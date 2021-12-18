@@ -20,7 +20,6 @@ async function run() {
     const productsCollection = database.collection("products");
     const orderCollection = database.collection("orders");
     const usersCollection = database.collection("users");
-    console.log("database connected");
     // save a user to database
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -71,6 +70,28 @@ async function run() {
         _id: req.query.id,
       });
       res.send(result);
+    });
+    // get the admin from the db
+    app.get("/users/:email", async (req, res) => {
+      const user = await usersCollection.findOne({ email: req.params.email });
+      let admin = false;
+      if (user?.role === "admin") {
+        admin = true;
+      }
+      res.json({ admin: admin });
+    });
+    // make an admin
+    app.put("/users/admin", async (req, res) => {
+      const user = req.body;
+      const options = { upsert: true };
+      const filter = { email: user.email };
+      const updateDoc = { $set: { role: "admin" } };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.json(result);
     });
   } finally {
     // await client.close();
