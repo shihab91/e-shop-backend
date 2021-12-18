@@ -39,12 +39,30 @@ async function run() {
         .toArray();
       res.json(shirts);
     });
+    // post a product
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      await productsCollection.insertOne(product);
+      res.json({ message: "product added" });
+    });
+    // get all the products
+    app.get("/products", async (req, res) => {
+      const products = await productsCollection.find().toArray();
+      res.json(products);
+    });
     // get single product from the productsCollection
     app.get("/products/:id", async (req, res) => {
       const product = await productsCollection.findOne({
         _id: ObjectId(req.params.id),
       });
       res.json(product);
+    });
+    // delete  a product from the productsCollection
+    app.delete("/products", async (req, res) => {
+      const result = await productsCollection.deleteOne({
+        _id: ObjectId(req.query.id),
+      });
+      res.json(result);
     });
     // save a order to the db
     app.post("/orders", async (req, res) => {
